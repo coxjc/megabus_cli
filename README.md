@@ -2,6 +2,8 @@
 Basic CLI for [Megabus](https://megabus.com/) prices
 
 ## Usage 
+Clone the repo to your host and run as follows:
+
 ```
 usage: megabus.py [-h] [-o ORIGIN] [-d DEST] [-t TIME] [-p PASSENGERS] command
 
