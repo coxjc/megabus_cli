@@ -36,12 +36,6 @@ def get_prices(origin_city_id, destination_city_id, departure, passengers):
     except Exception as e:
         raise e
 
-'''
-o_cities = get_origin_cities()
-d_cities = get_destination_cities(o_cities[0]['id'])
-dates = get_travel_dates(o_cities[0]['id'], d_cities[0]['id'])
-print(get_prices(o_cities[0]['id'], d_cities[0]['id'], dates[0], 3))
-'''
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("command",  help="'origin_cities', 'dest_cities', 'dates', or 'prices'")
 arg_parser.add_argument("-o", "--origin", help="origin city ID")
@@ -68,4 +62,6 @@ if __name__ == "__main__":
             print(get_prices(args.origin, args.dest, args.time, args.passengers))
         else:
             raise ValueError("origin city ID & destination city ID & time & passengers is required. run w/ -h flag for help.")
+    else:
+        raise ValueError("run w/ -h flag for help.")
 
