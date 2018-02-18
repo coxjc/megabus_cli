@@ -1,5 +1,5 @@
 # megabus_cli
-Basic CLI for Megabus (USA) prices
+Basic CLI for [Megabus](https://megabus.com/) prices
 
 ## Usage 
 ```
