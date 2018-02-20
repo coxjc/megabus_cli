@@ -1,6 +1,9 @@
-import argparse
+#!/usr/bin/env python3
+
 import json
 import requests
+
+import click
 
 ORIGIN_CITIES_URL = "https://us.megabus.com/journey-planner/api/origin-cities"
 DEST_CITIES_URL = lambda origin: "https://us.megabus.com/journey-planner/api/destination-cities?originCityId={}".format(origin)
@@ -9,18 +12,21 @@ PRICES_URL = lambda origin, destination, departure, passengers: "https://us.mega
 
 
 def get_origin_cities():
+    """Get origin cities."""
     r = requests.get(ORIGIN_CITIES_URL)
     try:
         return r.json()["cities"]
     except Exception as e:
         raise e
 
-def get_dest_cities(origin_city_id):
+
+def get_destination_cities(origin_city_id):
     r = requests.get(DEST_CITIES_URL(origin_city_id))
     try:
         return r.json()["cities"]
     except Exception as e:
         raise e
+
 
 def get_dates(origin_city_id, destination_city_id):
     r = requests.get(DATES_URL(origin_city_id, destination_city_id))
@@ -29,39 +35,116 @@ def get_dates(origin_city_id, destination_city_id):
     except Exception as e:
         raise e
 
+
 def get_prices(origin_city_id, destination_city_id, departure, passengers):
-    r = requests.get(PRICES_URL(origin_city_id, destination_city_id, departure, passengers))
+    r = requests.get(PRICES_URL(origin_city_id, destination_city_id, departure,
+                                passengers))
     try:
         return r.json()["journeys"]
     except Exception as e:
         raise e
 
-arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("command",  help="'origin_cities', 'dest_cities', 'dates', or 'prices'")
-arg_parser.add_argument("-o", "--origin", help="origin city ID")
-arg_parser.add_argument("-d", "--dest", help="destination city ID")
-arg_parser.add_argument("-t", "--time", help="date of departure in format: 'YYYY-MM-DD'")
-arg_parser.add_argument("-p", "--passengers", help="number of passengers")
+
+def get_city_id(candidate_city):
+    """Get the city ID, or return the argument if it's already an ID."""
+    try:
+        city_id = int(candidate_city)
+    except ValueError:
+        for city in get_origin_cities():
+            if candidate_city == city['name']:
+                city_id = city['id']
+                break
+        else:
+            raise ValueError(
+                'ID for city "{}" was not found.'.format(candidate_city))
+    return city_id
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command('origin-cities')
+@click.option('--raw', is_flag=True, help='Print raw JSON')
+def origin_cities(raw):
+    """List trip origin cities."""
+    cities = get_origin_cities()
+
+    if raw:
+        print(json.dumps(cities, indent=4))
+    else:
+        for city in sorted([city['name'] for city in cities]):
+            print(city)
+
+
+@cli.command('destination-cities')
+@click.argument('origin_city')
+@click.option('--raw', is_flag=True, help='Print raw JSON')
+def destination_cities(origin_city, raw):
+    """List destination cities available from a given ORIGIN_CITY.
+
+    ORIGIN_CITY may be a name or ID.
+    """
+    origin_city_id = get_city_id(origin_city)
+    cities = get_destination_cities(origin_city_id)
+    if raw:
+        print(json.dumps(cities, indent=4))
+    else:
+        for city in sorted([city['name'] for city in cities]):
+            print(city)
+
+
+@cli.command('dates')
+@click.argument('origin_city')
+@click.argument('destination_city')
+@click.option('--raw', is_flag=True, help='Print raw JSON')
+def dates(origin_city, destination_city, raw):
+    """List departure dates for a trip from ORIGIN_CITY to DESTINATION_CITY.
+
+    ORIGIN_CITY may be a name or ID.
+    DESTINATION_CITY may be a name or ID.
+    """
+    origin_city_id = get_city_id(origin_city)
+    destination_city_id = get_city_id(destination_city)
+    dates = get_dates(origin_city_id, destination_city_id)
+
+    if raw:
+        print(json.dumps(dates, indent=4))
+    else:
+        for date in sorted(dates):
+            print(date)
+
+
+@cli.command('prices')
+@click.argument('origin_city')
+@click.argument('destination_city')
+@click.argument('date')
+@click.argument('n_passengers', type=int)
+@click.option('--raw', is_flag=True, help='Print raw JSON')
+def prices(origin_city, destination_city, date, n_passengers, raw):
+    """List trip prices for a trip on DATE.
+
+    N_PASSENGERS take the trip from ORIGIN_CITY to DESTINATION_CITY.
+    ORIGIN_CITY may be a name or ID.
+    DESTINATION_CITY may be a name or ID.
+    DATE is formatted as YYYY-MM-DD.
+    """
+    origin_city_id = get_city_id(origin_city)
+    destination_city_id = get_city_id(destination_city)
+    prices = get_prices(origin_city_id, destination_city_id, date,
+                        n_passengers)
+
+    if raw:
+        print(json.dumps(prices, indent=4))
+    else:
+        for price in sorted(prices):
+            print("${:.2f}: {} - {}".format(
+                price['price'],
+                price['departureDateTime'],
+                price['arrivalDateTime']
+            ))
+
 
 if __name__ == "__main__":
-    args = arg_parser.parse_args()
-    if args.command == "origin_cities":
-        print(get_origin_cities())
-    elif args.command == "dest_cities":
-        if args.origin:
-            print(get_dest_cities(args.origin))
-        else:
-            raise ValueError("origin city ID is required. run w/ -h flag for help.")
-    elif args.command == "dates":
-        if args.origin and args.dest:
-            print(get_dates(args.origin, args.dest))
-        else:
-            raise ValueError("origin city ID & destination city ID is required. run w/ -h flag for help.")
-    elif args.command == "prices":
-        if args.origin and args.dest and args.time and args.passengers:
-            print(get_prices(args.origin, args.dest, args.time, args.passengers))
-        else:
-            raise ValueError("origin city ID & destination city ID & time & passengers is required. run w/ -h flag for help.")
-    else:
-        raise ValueError("run w/ -h flag for help.")
-
+    cli()
