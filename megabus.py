@@ -1,9 +1,9 @@
-import argparse 
+import argparse
 import json
 import requests
 
 ORIGIN_CITIES_URL = "https://us.megabus.com/journey-planner/api/origin-cities"
-DEST_CITIES_URL = lambda origin: "https://us.megabus.com/journey-planner/api/destination-cities?originCityId={}".format(origin) 
+DEST_CITIES_URL = lambda origin: "https://us.megabus.com/journey-planner/api/destination-cities?originCityId={}".format(origin)
 DATES_URL = lambda origin, destination: "https://us.megabus.com/journey-planner/api/journeys/travel-dates?originCityId={}&destinationCityId={}".format(origin, destination)
 PRICES_URL = lambda origin, destination, departure, passengers: "https://us.megabus.com/journey-planner/api/journeys?originId={}&destinationId={}&departureDate={}&totalPassengers={}".format(origin, destination, departure, passengers)
 
@@ -16,7 +16,7 @@ def get_origin_cities():
         raise e
 
 def get_dest_cities(origin_city_id):
-    r = requests.get(DEST_CITIES_URL(origin_city_id))    
+    r = requests.get(DEST_CITIES_URL(origin_city_id))
     try:
         return r.json()["cities"]
     except Exception as e:
@@ -31,7 +31,7 @@ def get_dates(origin_city_id, destination_city_id):
 
 def get_prices(origin_city_id, destination_city_id, departure, passengers):
     r = requests.get(PRICES_URL(origin_city_id, destination_city_id, departure, passengers))
-    try: 
+    try:
         return r.json()["journeys"]
     except Exception as e:
         raise e
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     elif args.command == "dates":
         if args.origin and args.dest:
             print(get_dates(args.origin, args.dest))
-        else: 
+        else:
             raise ValueError("origin city ID & destination city ID is required. run w/ -h flag for help.")
     elif args.command == "prices":
         if args.origin and args.dest and args.time and args.passengers:
