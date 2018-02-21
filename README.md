@@ -2,33 +2,34 @@
 Basic CLI for [Megabus](https://megabus.com/) prices
 
 ## Usage 
-Clone the repo to your host and run as follows:
+Clone the repository to your host and run as follows:
 
 ```
-usage: megabus.py [-h] [-o ORIGIN] [-d DEST] [-t TIME] [-p PASSENGERS] command
-
-positional arguments:
-  command               'origin_cities', 'dest_cities', 'dates', or 'prices'
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -o ORIGIN, --origin ORIGIN
-                        origin city ID
-  -d DEST, --dest DEST  destination city ID
-  -t TIME, --time TIME  date of departure in format: 'YYYY-MM-DD'
-  -p PASSENGERS, --passengers PASSENGERS
-                        number of passengers
+megabus.py [COMMAND]
 ```
 
-- `origin_cities`: Return all origin cities & their applicable information.
-- `dest_cities`: Given an origin city, returns all possible destination cities. 
-- `dates`: Given an origin and destination, returns available dates.
-- `prices`: Given an origin, destination, time (date), and passenger count, returns a list of prices & their applicable information. 
+Available commands:
+- `origin-cities`: Return all origin cities and their applicable information.
+- `destination-cities`: Given an origin city, returns all possible destination
+  cities. 
+- `dates`: Given an origin and destination (in that order), returns available
+  dates.
+- `prices`: Given an origin, destination, departure date, and passenger count
+  (in that order), returns a list of prices & their applicable information. 
 
-**All outputs are in JSON.**
+Outputs are pretty printed by default but the `--raw` argument specifies JSON output.
+
+For detailed command documentation, run `megabus.py --help` and `megabus.py
+[COMMAND] --help`.
 
 ## Requirements
-The script requires Python 3.  Libraries used are: `argparse`, `json`, `requests`. All of these are likely already companionated with your Python 3 installation. 
+The script requires Python 3.  External dependencies are listed in
+`requirements.txt` and can be installed with:
+
+```
+python3 -m pip install -r requirements.txt
+```
 
 ## Contribute
-Please open an issue if you find a bug. Also, you're more than welcome to fork & open a PR if you want to suggest changes! 
+Please open an issue if you find a bug. Also, you're more than welcome to fork
+and open a PR if you want to suggest changes! 
