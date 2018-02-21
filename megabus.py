@@ -140,7 +140,7 @@ def prices(origin_city, destination_city, date, n_passengers, raw):
     if raw:
         print(json.dumps(prices, indent=4))
     else:
-        for price in sorted(prices):
+        for price in sorted(prices, key=lambda p: p['price']):
             print("${:.2f}: {} - {}".format(
                 price['price'],
                 price['departureDateTime'],
