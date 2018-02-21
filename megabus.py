@@ -74,8 +74,9 @@ def origin_cities(raw):
     if raw:
         print(json.dumps(cities, indent=4))
     else:
-        for city in sorted([city['name'] for city in cities]):
-            print(city)
+        city_info = [(city['id'], city['name']) for city in cities]
+        for city in sorted(city_info, key=lambda c: c[1]):
+            print('{}: {}'.format(city[0], city[1]))
 
 
 @cli.command('destination-cities')
@@ -91,8 +92,9 @@ def destination_cities(origin_city, raw):
     if raw:
         print(json.dumps(cities, indent=4))
     else:
-        for city in sorted([city['name'] for city in cities]):
-            print(city)
+        city_info = [(city['id'], city['name']) for city in cities]
+        for city in sorted(city_info, key=lambda c: c[1]):
+            print('{}: {}'.format(city[0], city[1]))
 
 
 @cli.command('dates')
